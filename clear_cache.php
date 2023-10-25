@@ -13,14 +13,20 @@ function clear_cache()
 
     $ui->setCacheDir('ui/compiled'); // Set the cache directory path
 
-// Clear the cache
-$cacheDir = $ui->getCacheDir();
-$cacheFiles = glob($cacheDir . '/*');
-foreach ($cacheFiles as $file) {
-    if (is_file($file)) {
-        unlink($file);
+    try {
+        // Clear the cache
+        $cacheDir = $ui->getCacheDir();
+        $cacheFiles = glob($cacheDir . '/*');
+        foreach ($cacheFiles as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+
+        // Cache cleared successfully
+        r2(U . 'dashboard', 's', Lang::T("Cache cleared successfully!"));
+    } catch (Exception $e) {
+        // Error occurred while clearing the cache
+        r2(U . 'dashboard', 'e', Lang::T("Error occurred while clearing the cache: ") . $e->getMessage());
     }
-}
-  //echo 'Cache cleared successfully!';
-  r2(U . 'dashboard', 's', Lang::T("Cache cleared successfully!"));
 }
