@@ -11,6 +11,11 @@ function clear_cache()
     $admin = Admin::_info();
     $ui->assign('_admin', $admin);
 
+    // Check user type for access
+    if ($admin['user_type'] != 'SuperAdmin' && $admin['user_type'] != 'Admin'){
+        r2(U . "dashboard", 'e', Lang::T("You Do Not Have Access"));
+    }
+
     $compiledCacheDir = 'ui/compiled';
     $templateCacheDir = 'system/cache';
 
@@ -35,9 +40,11 @@ function clear_cache()
         }
 
         // Cache cleared successfully
+        _log('[' . $admin['username'] . ']: ' . Lang::T(' Cleared the system cache '), $admin['user_type']);
         r2(U . 'dashboard', 's', Lang::T("Cache cleared successfully!"));
     } catch (Exception $e) {
         // Error occurred while clearing the cache
+        _log('[' . $admin['username'] . ']: ' . Lang::T(' Error occurred while clearing the cache: '. $e->getMessage()), $admin['user_type']);
         r2(U . 'dashboard', 'e', Lang::T("Error occurred while clearing the cache: ") . $e->getMessage());
     }
 }
