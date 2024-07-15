@@ -1,6 +1,6 @@
 <?php
 
-register_menu("Clear Cache", true, "clear_cache", 'SETTINGS', '');
+register_menu("Clear System Cache", true, "clear_cache", 'SETTINGS', '');
 
 function clear_cache()
 {
