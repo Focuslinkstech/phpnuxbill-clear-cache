@@ -11,13 +11,24 @@ function clear_cache()
     $admin = Admin::_info();
     $ui->assign('_admin', $admin);
 
-    $ui->setCacheDir('ui/compiled'); // Set the cache directory path
+    $compiledCacheDir = 'ui/compiled';
+    $templateCacheDir = 'system/cache';
 
     try {
-        // Clear the cache
-        $cacheDir = $ui->getCacheDir();
-        $cacheFiles = glob($cacheDir . '/*');
-        foreach ($cacheFiles as $file) {
+        // Clear the compiled cache
+        $ui->setCacheDir($compiledCacheDir);
+        $CACHE_PATH = $ui->getCacheDir();
+        $files = scandir($CACHE_PATH);
+        foreach ($files as $file) {
+            $ext = pathinfo($file, PATHINFO_EXTENSION);
+            if (is_file($CACHE_PATH . DIRECTORY_SEPARATOR . $file) && $ext == 'temp') {
+                unlink($CACHE_PATH . DIRECTORY_SEPARATOR . $file);
+            }
+        }
+        // Clear the template cache
+        $ui->setCacheDir($templateCacheDir);
+        $templateCacheFiles = glob($ui->getCacheDir() . '/*');
+        foreach ($templateCacheFiles as $file) {
             if (is_file($file)) {
                 unlink($file);
             }
