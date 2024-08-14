@@ -12,8 +12,9 @@ function clear_cache()
     $ui->assign('_admin', $admin);
 
     // Check user type for access
-    if ($admin['user_type'] != 'SuperAdmin' && $admin['user_type'] != 'Admin'){
-        r2(U . "dashboard", 'e', Lang::T("You Do Not Have Access"));
+    if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+        _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        exit;
     }
 
     $compiledCacheDir = 'ui/compiled';
@@ -21,18 +22,15 @@ function clear_cache()
 
     try {
         // Clear the compiled cache
-        $ui->setCacheDir($compiledCacheDir);
-        $CACHE_PATH = $ui->getCacheDir();
-        $files = scandir($CACHE_PATH);
+        $files = scandir($compiledCacheDir);
         foreach ($files as $file) {
-            $ext = pathinfo($file, PATHINFO_EXTENSION);
-            if (is_file($CACHE_PATH . DIRECTORY_SEPARATOR . $file) && $ext == 'temp') {
-                unlink($CACHE_PATH . DIRECTORY_SEPARATOR . $file);
+            if ($file !== '.' && $file !== '..' && is_file($compiledCacheDir . '/' . $file)) {
+                unlink($compiledCacheDir . '/' . $file);
             }
         }
+
         // Clear the template cache
-        $ui->setCacheDir($templateCacheDir);
-        $templateCacheFiles = glob($ui->getCacheDir() . '/*');
+        $templateCacheFiles = glob($templateCacheDir . '/*.{json,temp}', GLOB_BRACE);
         foreach ($templateCacheFiles as $file) {
             if (is_file($file)) {
                 unlink($file);
@@ -40,11 +38,11 @@ function clear_cache()
         }
 
         // Cache cleared successfully
-        _log('[' . $admin['fullname'] . ']: ' . Lang::T(' Cleared the system cache '), $admin['user_type']);
+        _log('[' . ($admin['fullname'] ?? 'Unknown Admin') . ']: ' . Lang::T(' Cleared the system cache '), $admin['user_type']);
         r2(U . 'dashboard', 's', Lang::T("Cache cleared successfully!"));
     } catch (Exception $e) {
         // Error occurred while clearing the cache
-        _log('[' . $admin['fullname'] . ']: ' . Lang::T(' Error occurred while clearing the cache: '. $e->getMessage()), $admin['user_type']);
+        _log('[' . ($admin['fullname'] ?? 'Unknown Admin') . ']: ' . Lang::T(' Error occurred while clearing the cache: ' . $e->getMessage()), $admin['user_type']);
         r2(U . 'dashboard', 'e', Lang::T("Error occurred while clearing the cache: ") . $e->getMessage());
     }
 }
